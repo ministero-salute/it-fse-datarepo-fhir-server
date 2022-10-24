@@ -357,7 +357,7 @@
                             <goal>repackage</goal>
                         </goals>
                         <configuration>
-                            <mainClass>ca.uhn.fhir.jpa.starter.Application</mainClass>
+                            <mainClass>it.finanze.sanita.ms.serverfhir.Application</mainClass>
                         </configuration>
                     </execution>
                 </executions>

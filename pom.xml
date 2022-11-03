@@ -343,7 +343,7 @@
         </pluginManagement>
 
         <!-- Tells Maven to name the generated WAR file as ROOT.war -->
-        <finalName>datarepo-fhir-server-ms-${project.version}</finalName>
+        <finalName>${project.artifactId}-${project.version}</finalName>
 
         <plugins>
             <plugin>
@@ -602,7 +602,7 @@
                                         <copy todir="${container.output}" overwrite="true"
                                               failonerror="false">
                                             <fileset dir="${project.basedir}/target"
-                                                     includes="${project.artifactId}.jar" />
+                                                     includes="${project.artifactId}-${project.version}.jar" />
                                         </copy>
                                     </then>
                                 </if>

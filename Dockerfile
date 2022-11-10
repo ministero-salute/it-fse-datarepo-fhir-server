@@ -10,7 +10,7 @@ ENV WORKBENCH_MAX_METASPACE_SIZE=1024
 
 ENV JAVA_OPTIONS="-XX:TieredStopAtLevel=1 -noverify -Xms512m -Xmx1024m"
 
-COPY ${JAR_FILE} /deployments/
-COPY ${RUNTIME} /deployments/
+COPY ${JAR_FILE} --chown=jboss:jboss /deployments/
+COPY ${RUNTIME} --chown jboss:jboss /deployments/
 
 USER jboss

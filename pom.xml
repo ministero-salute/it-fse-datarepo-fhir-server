@@ -591,17 +591,17 @@
                                               overwrite="true" failonerror="false">
                                             <fileset dir="${config.infra}/runtime" includes="**" />
                                         </copy>
-                                        <!-- copy common resources of server runtime to project build directory
+                                        <!-- copy common resources of server runtime to project build directory -->
                                         <copy todir="${container.output}" overwrite="true"
                                               failonerror="false">
                                             <fileset dir="${project.basedir}"
                                                      includes="Dockerfile" />
-                                        </copy> -->
+                                        </copy>
                                         <!-- copy common resources of server runtime to project build directory -->
                                         <copy todir="${container.output}" overwrite="true"
                                               failonerror="false">
-                                            <fileset dir="${project.basedir}/target"
-                                                     includes="${project.artifactId}-${project.version}.jar" />
+                                            <fileset dir="${project.basedir}"
+                                                     includes="/target/${project.artifactId}-${project.version}.jar"/>
                                         </copy>
                                     </then>
                                 </if>

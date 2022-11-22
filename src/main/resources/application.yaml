@@ -191,3 +191,13 @@ hapi:
 #  protocol: 'http'
 #  schema_management_strategy: CREATE
 #  username: SomeUsername
+basic-auth:
+  status: true
+  admin-user: admin
+  admin-password: admin
+  human-user: human
+  human-password: human
+audit:
+  status: false
+crypt:
+  status: false

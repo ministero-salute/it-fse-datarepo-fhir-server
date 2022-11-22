@@ -11,45 +11,57 @@ import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 
+@Component
 public class Listener {
+	
+
+	@Value("${crypt.status}")
+	private Boolean cryptStatus;
 	
 	@PostLoad
 	@PostUpdate
 	//@PostPersist
 	public void decrypt(Object pc) {
-		if (!(pc instanceof ResourceHistoryTable)) {
-			return;
-		}
-		ResourceHistoryTable rt = (ResourceHistoryTable) pc;
-		byte[] cryptedContent = rt.getResource();
-		byte[] decryptedContent = decrypt(cryptedContent);
-		rt.setResource(decryptedContent);
+		if(cryptStatus) {
+			if (!(pc instanceof ResourceHistoryTable)) {
+				return;
+			}
+			ResourceHistoryTable rt = (ResourceHistoryTable) pc;
+			byte[] cryptedContent = rt.getResource();
+			byte[] decryptedContent = decrypt(cryptedContent);
+			rt.setResource(decryptedContent);
 //		try {
 //			System.out.println("TESTO DECRIPTATO: " + new String(decompressGzip(rt.getResource())));
 //		} catch (IOException e) {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
+		}
 	}
 
    @PrePersist
    @PreUpdate
    public void encrypt(Object pc) {
-      if (!(pc instanceof ResourceHistoryTable)) {
-         return;
-      }
-
-      ResourceHistoryTable rt = (ResourceHistoryTable) pc;
-      try {
-		System.out.println("TESTO CHE NON SIA CRIPTATO " + new String(decompressGzip(rt.getResource())));
-System.out.println("Lo crypto prima di inserire su db");
-	rt.setResource(crypt(rt.getResource()));
-} catch (IOException e) {
-	// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+	   if(cryptStatus) {
+		   if (!(pc instanceof ResourceHistoryTable)) {
+			   return;
+		   }
+		   
+		   ResourceHistoryTable rt = (ResourceHistoryTable) pc;
+		   try {
+			   System.out.println("TESTO CHE NON SIA CRIPTATO " + new String(decompressGzip(rt.getResource())));
+			   System.out.println("Lo crypto prima di inserire su db");
+			   rt.setResource(crypt(rt.getResource()));
+		   } catch (IOException e) {
+			   // TODO Auto-generated catch block
+			   e.printStackTrace();
+		   }
+	   }
    }
    
    

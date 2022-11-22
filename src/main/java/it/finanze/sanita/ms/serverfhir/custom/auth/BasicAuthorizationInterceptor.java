@@ -50,10 +50,16 @@ public class BasicAuthorizationInterceptor extends AuthorizationInterceptor {
 		return out;
 	}
 
-	private boolean check(BasicAuthDTO authInfo) {
-		boolean isAdmin = authInfo.getUser().equalsIgnoreCase(adminUsr) && authInfo.getPassword().equalsIgnoreCase(adminPwd);
-		boolean isHuman = authInfo.getUser().equalsIgnoreCase(humanUsr) && authInfo.getPassword().equalsIgnoreCase(humanPwd);
-		return isAdmin || isHuman;
+	private boolean check(final BasicAuthDTO authInfo) {
+		boolean output = false;
+		try {
+			boolean isAdmin = adminUsr.equals(authInfo.getUser()) && adminPwd.equals(authInfo.getPassword());
+			boolean isHuman = humanUsr.equals(authInfo.getUser()) && humanPwd.equals(authInfo.getPassword());
+			output = isAdmin || isHuman;
+		} catch(Exception ex) {
+			throw new AuthenticationException(Msg.code(644) + "Missing or invalid Authorization header value");
+		}
+		return output;
 	}
 
 }

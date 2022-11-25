@@ -16,4 +16,8 @@ hapi:
       home:
         server_address: 'http://host.docker.internal:8080/fhir'
 basic-auth:
-  status: false
+  status: true
+  admin-user: admin
+  admin-password: admin
+  human-user: human
+  human-password: human

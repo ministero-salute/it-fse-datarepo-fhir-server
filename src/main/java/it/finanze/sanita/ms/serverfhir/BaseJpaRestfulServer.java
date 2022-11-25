@@ -1,5 +1,23 @@
 package it.finanze.sanita.ms.serverfhir;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.servlet.ServletException;
+
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.cors.CorsConfiguration;
+
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -21,15 +39,14 @@ import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
+import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.mdm.provider.MdmProviderLoader;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.narrative2.NullNarrativeGenerator;
-import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import ca.uhn.fhir.rest.server.ApacheProxyAddressStrategy;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
@@ -48,22 +65,8 @@ import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import it.finanze.sanita.ms.serverfhir.config.OpenApiCFG;
 import it.finanze.sanita.ms.serverfhir.repository.IRepositoryValidationInterceptorFactory;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.servlet.ServletException;
-import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.http.HttpHeaders;
-import org.springframework.web.cors.CorsConfiguration;
 
 public class BaseJpaRestfulServer extends RestfulServer {
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaRestfulServer.class);
@@ -118,6 +121,9 @@ public class BaseJpaRestfulServer extends RestfulServer {
   @Autowired
   private IValidationSupport myValidationSupport;
 
+  @Autowired
+  private OpenApiCFG openApiCFG;
+  
   public BaseJpaRestfulServer() {
   }
 
@@ -367,7 +373,7 @@ public class BaseJpaRestfulServer extends RestfulServer {
     daoConfig.setDeferIndexingForCodesystemsOfSize(appProperties.getDefer_indexing_for_codesystems_of_size());
 
 	 if (appProperties.getOpenapi_enabled()) {
-		registerInterceptor(new OpenApiInterceptor());
+		registerInterceptor(openApiCFG);
 	}
 
     // Bulk Export

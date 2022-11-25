@@ -3,6 +3,7 @@ package it.finanze.sanita.ms.serverfhir.custom.auth;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import ca.uhn.fhir.i18n.Msg;
@@ -11,6 +12,8 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 
 @Component
 public class BasicAuthorizationInterceptor extends AuthorizationInterceptor {
@@ -34,17 +37,23 @@ public class BasicAuthorizationInterceptor extends AuthorizationInterceptor {
 	public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 		List<IAuthRule> out = null;
 		Boolean allow = false;
-		if (status!=null && status) {
-			BasicAuthDTO authInfo = BasicAuthUtility.calculate(theRequestDetails);
-			allow = check(authInfo);
-		} else {
-			allow = true;
-		}
-		if (allow) {
+		
+		if(theRequestDetails.getCompleteUrl().contains("swagger-ui") || 
+				theRequestDetails.getCompleteUrl().contains("api-docs")) {
 			out = new RuleBuilder().allowAll().build();
 		} else {
-			// Throw an HTTP 401
-			throw new AuthenticationException(Msg.code(644) + "Missing or invalid Authorization header value");
+			if (status!=null && status) {
+				BasicAuthDTO authInfo = BasicAuthUtility.calculate(theRequestDetails);
+				allow = check(authInfo);
+			} else {
+				allow = true;
+			}
+			if (allow) {
+				out = new RuleBuilder().allowAll().build();
+			} else {
+				// Throw an HTTP 401
+				throw new AuthenticationException(Msg.code(644) + "Missing or invalid Authorization header value");
+			}
 		}
 		
 		return out;
@@ -61,5 +70,6 @@ public class BasicAuthorizationInterceptor extends AuthorizationInterceptor {
 		}
 		return output;
 	}
-
+	
+	
 }

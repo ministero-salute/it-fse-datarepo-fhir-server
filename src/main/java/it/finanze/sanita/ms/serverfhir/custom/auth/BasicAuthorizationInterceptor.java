@@ -39,7 +39,8 @@ public class BasicAuthorizationInterceptor extends AuthorizationInterceptor {
 		Boolean allow = false;
 		
 		if(theRequestDetails.getCompleteUrl().contains("swagger-ui") || 
-				theRequestDetails.getCompleteUrl().contains("api-docs")) {
+				theRequestDetails.getCompleteUrl().contains("api-docs") || 
+				theRequestDetails.getCompleteUrl().endsWith("metadata")) {
 			out = new RuleBuilder().allowAll().build();
 		} else {
 			if (status!=null && status) {

@@ -1,5 +1,5 @@
 spring:
-  profiles: docker
+  profiles: dev
   datasource:
     url: 'jdbc:h2:file:./target/database/h2'
     #url: jdbc:h2:mem:test_mem
@@ -14,7 +14,7 @@ spring:
     fhir:
       tester:
         home:
-          server_address: 'http://host.docker.internal:8080/fhir'
+          server_address: 'http://localhost:8080/fhir'
   basic-auth:
     status: true
     admin-user: admin

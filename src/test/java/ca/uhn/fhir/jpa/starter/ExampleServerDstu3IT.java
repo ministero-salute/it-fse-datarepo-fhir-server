@@ -119,7 +119,7 @@ public class ExampleServerDstu3IT implements IServerSupport {
     Parameters.ParametersParameterComponent component = response.get(0);
     Assert.assertTrue(component.getResource() instanceof MeasureReport);
     MeasureReport report = (MeasureReport) component.getResource();
-    Assert.assertEquals("Measure/"+measureId, report.getMeasure());
+    Assert.assertEquals("Measure/"+measureId, report.getMeasure().toString());
   }
 
   private int loadDataFromDirectory(String theDirectoryName) throws IOException {

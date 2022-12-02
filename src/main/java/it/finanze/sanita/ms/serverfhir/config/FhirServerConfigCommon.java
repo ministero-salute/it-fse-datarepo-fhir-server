@@ -14,7 +14,6 @@ import ca.uhn.fhir.rest.server.mail.IMailSvc;
 import ca.uhn.fhir.rest.server.mail.MailConfig;
 import ca.uhn.fhir.rest.server.mail.MailSvc;
 import it.finanze.sanita.ms.serverfhir.AppProperties;
-import it.finanze.sanita.ms.serverfhir.AppProperties.Subscription.Email;
 import it.finanze.sanita.ms.serverfhir.repository.JpaHibernatePropertiesProvider;
 
 import com.google.common.base.Strings;

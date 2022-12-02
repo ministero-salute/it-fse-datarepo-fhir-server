@@ -1,88 +1,83 @@
 package it.finanze.sanita.ms.serverfhir.custom.crypt;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Base64;
-import java.util.zip.GZIPInputStream;
-
 import javax.persistence.PostLoad;
 import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.StringType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.GZipUtil;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 
 @Component
 public class Listener {
-	
+
+	private static FhirContext fhirContextR4;
+
+	static {
+		fhirContextR4 = FhirContext.forR4();
+	}
 
 	@Value("${crypt.status}")
 	private Boolean cryptStatus;
-	
+
 	@PostLoad
 	@PostUpdate
-	//@PostPersist
 	public void decrypt(Object pc) {
-		if(cryptStatus) {
+		try {
+			if(Boolean.TRUE.equals(cryptStatus)) {
+				if (!(pc instanceof ResourceHistoryTable)) {
+					return;
+				}
+				ResourceHistoryTable rt = (ResourceHistoryTable) pc;
+				if(ResourceType.Patient.equals(ResourceType.fromCode(rt.getResourceType()))) {
+					//decryptPatient
+					rt.setResource(reverseInfoPatient(rt.getResource()));
+				}  
+			}
+		} catch (Exception ex) {
+			System.out.println("Eccezione : " + ex);
+		}
+	}
+
+	@PrePersist
+	@PreUpdate
+	public void encrypt(Object pc) {
+		if(Boolean.TRUE.equals(cryptStatus)) {
 			if (!(pc instanceof ResourceHistoryTable)) {
 				return;
 			}
 			ResourceHistoryTable rt = (ResourceHistoryTable) pc;
-			byte[] cryptedContent = rt.getResource();
-			byte[] decryptedContent = decrypt(cryptedContent);
-			rt.setResource(decryptedContent);
-//		try {
-//			System.out.println("TESTO DECRIPTATO: " + new String(decompressGzip(rt.getResource())));
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+			if(ResourceType.Patient.equals(ResourceType.fromCode(rt.getResourceType()))) {
+				//encryptPatient
+				rt.setResource(reverseInfoPatient(rt.getResource()));
+			} else if(ResourceType.Bundle.equals(ResourceType.fromCode(rt.getResourceType()))) {
+				System.out.println("Sono un bundle");
+			}
 		}
+
 	}
 
-   @PrePersist
-   @PreUpdate
-   public void encrypt(Object pc) {
-	   if(cryptStatus) {
-		   if (!(pc instanceof ResourceHistoryTable)) {
-			   return;
-		   }
-		   
-		   ResourceHistoryTable rt = (ResourceHistoryTable) pc;
-		   try {
-			   System.out.println("TESTO CHE NON SIA CRIPTATO " + new String(decompressGzip(rt.getResource())));
-			   System.out.println("Lo crypto prima di inserire su db");
-			   rt.setResource(crypt(rt.getResource()));
-		   } catch (IOException e) {
-			   // TODO Auto-generated catch block
-			   e.printStackTrace();
-		   }
-	   }
-   }
-   
-   
-   private byte[] crypt(byte[] word) {
-	   return Base64.getEncoder().encode(word);
+	private byte[] reverseInfoPatient(byte[] resource) {
+		byte[] out = null;
+		Patient patient = fhirContextR4.newJsonParser().parseResource(Patient.class, GZipUtil.decompress(resource));
+		for(HumanName humanName : patient.getName()) {
+			humanName.setFamily(StringUtils.reverse(humanName.getFamily()));
+			for(StringType given : humanName.getGiven()) {
+				given.setValue(StringUtils.reverse(given.getValue()));
+			}
+		}
+
+		out = GZipUtil.compress(fhirContextR4.newJsonParser().encodeResourceToString(patient)); 
+
+		return out;
 	}
-		   
-   private byte[] decrypt(byte[] word) {
-	   return Base64.getDecoder().decode(word);
-	}
-
-    private static byte[] decompressGzip(byte[] source) throws IOException {
-
-    	GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(source));
-    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = gis.read(buffer)) > 0) {
-            	baos.write(buffer);
-            }
-
-        return baos.toByteArray();
-    }
 }

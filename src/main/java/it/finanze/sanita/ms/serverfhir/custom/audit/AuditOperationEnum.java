@@ -1,9 +1,8 @@
 package it.finanze.sanita.ms.serverfhir.custom.audit;
 
-import org.hl7.fhir.dstu2.model.Bundle.BundleType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.AuditEvent.AuditEventAction;
+import org.hl7.fhir.r4.model.Bundle;
 
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 
@@ -39,7 +38,8 @@ public enum AuditOperationEnum {
 			out = CREATE;
 			if (resource instanceof Bundle) {
 				Bundle b = (Bundle) resource;
-				if (BundleType.TRANSACTION.equals(b.getType())) {
+				b.getType();
+				if (org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.getDefinition().equals(b.getType().getDefinition())) {
 					out = TRANSACTION;
 				}
 			}

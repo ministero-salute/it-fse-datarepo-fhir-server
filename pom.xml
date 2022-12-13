@@ -24,7 +24,7 @@
 	<name>datarepo-fhir-server-ms</name>
 
 	<properties>
-		<java.version>8</java.version>
+		<java.version>11</java.version>
 		<!-- Sonar integration -->
 		<sonar.organization>ministero-salute</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -448,7 +448,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
 				<configuration>
-					<release>8</release>
+					<release>11</release>
 				</configuration>
 			</plugin>
 

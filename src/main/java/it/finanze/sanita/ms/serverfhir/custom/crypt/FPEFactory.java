@@ -35,15 +35,20 @@ public class FPEFactory {
     
 	@Value("${crypt.securedata.format")
     private List<String> formats;
+	
+	@Value("${crypt.status}")
+	private Boolean cryptStatus;
 
 	private AES aes = null;
-	private Map<String, FPE> fpedictionary = new HashMap<String, FPE>();
+	private Map<String, FPE> fpedictionary = new HashMap<>();
     private LibraryContext library = null;
     private Exception startupex = null;
     
     @PostConstruct
-	void postConstruct() {               
-    	createSharedLibraryContext();
+	void postConstruct() {     
+    	if(Boolean.TRUE.equals(cryptStatus)) {
+    		createSharedLibraryContext();
+    	}
     }
     
 	void createSharedLibraryContext() {               

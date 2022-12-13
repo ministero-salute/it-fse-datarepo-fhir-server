@@ -15,7 +15,9 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,10 +29,16 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import it.finanze.sanita.ms.serverfhir.custom.auth.BasicAuthDTO;
 import it.finanze.sanita.ms.serverfhir.custom.auth.BasicAuthUtility;
+import it.finanze.sanita.ms.serverfhir.custom.crypt.CryptUtility;
+import it.finanze.sanita.ms.serverfhir.custom.crypt.FPEFactory;
+import it.finanze.sanita.ms.serverfhir.custom.helper.FHIRR4Helper;
 
 @Component
 @Interceptor
 public class AuditInterceptor {
+
+	@Autowired
+	private FPEFactory fpeFactory;
 
 	@Value("${audit.status}")
 	private Boolean auditStatus;
@@ -41,13 +49,22 @@ public class AuditInterceptor {
 	@Value("${basic-auth.admin-password}")
 	private String adminPwd;
 
+	@Value("${crypt.status}")
+	private Boolean cryptStatus;
+
 	@Hook(value=Pointcut.SERVER_OUTGOING_RESPONSE)
 	public boolean completed(RequestDetails theRequestDetails, ResponseDetails theResponseDetails) {
+
+		if (cryptStatus!=null && cryptStatus) {
+			CryptUtility.decrypt(theResponseDetails, fpeFactory.getAES());
+		}
+		
 		if (auditStatus!=null && auditStatus) {
 			BasicAuthDTO baDTO = BasicAuthUtility.calculate(theRequestDetails);
 			AuditEventOutcome outcome = getOutcome(theResponseDetails.getResponseCode());
 			AuditEvent auditEvent = createAuditEvent(isFromGateway(baDTO), baDTO.getUser(), theRequestDetails.getRequestType(), theRequestDetails.getResource(), outcome);
 			if (auditEvent!=null) {
+				System.out.println(FHIRR4Helper.serializeResource(auditEvent, true, false, false));
 				//TODO: SAVE AUDIT EVENT
 			}
 			Bundle auditBundle = createAuditBundle(theRequestDetails.getResource());
@@ -74,7 +91,11 @@ public class AuditInterceptor {
 	}
 
 	private boolean isFromGateway(BasicAuthDTO baDTO) {
-		return baDTO.getUser().equalsIgnoreCase(adminUsr) && baDTO.getPassword().equalsIgnoreCase(adminPwd);
+		boolean out = false;
+		if (baDTO.getUser() != null && baDTO.getPassword() != null) {
+			out = baDTO.getUser().equalsIgnoreCase(adminUsr) && baDTO.getPassword().equalsIgnoreCase(adminPwd);
+		}
+		return out;
 	}
 
 	private AuditEventOutcome getOutcome(int responseCode) {
@@ -89,8 +110,13 @@ public class AuditInterceptor {
 		return out;
 	}
 
-	private AuditEvent createAuditEvent(boolean fromGateway, String user, RequestTypeEnum requestType, IBaseResource resource, AuditEventOutcome outcome) {
+	private AuditEvent createAuditEvent(boolean fromGateway, String inUser, RequestTypeEnum requestType, IBaseResource resource, AuditEventOutcome outcome) {
 		AuditEvent ae = null;
+		String user = "Anonymous";
+		
+		if (inUser != null && !inUser.isEmpty()) {
+			user = inUser;
+		}
 		
 		if (RequestTypeEnum.DELETE.equals(requestType) || RequestTypeEnum.PATCH.equals(requestType) || RequestTypeEnum.POST.equals(requestType) || RequestTypeEnum.PUT.equals(requestType)) {
 			ae = new AuditEvent();
@@ -129,15 +155,23 @@ public class AuditInterceptor {
 
 			List<AuditEventAgentComponent> agents = new ArrayList<>();
 			AuditEventAgentComponent agent = new AuditEventAgentComponent();
+			
+			Reference ref = new Reference();
+			Identifier value = new Identifier();
+			ref.setIdentifier(value);
+			agent.setWho(ref);
+
 			if (fromGateway) {
 				agent.setType(new CodeableConcept(new Coding("http://terminology.hl7.org/CodeSystem/extra-security-role-type", "authserver", "Authorization Server")));
-				agent.setWho(new Reference("Gateway"));
+				value.setValue("Gateway");
+				agent.setAltId("Gateway");
+				agent.setName("Gateway");
 			} else {
 				agent.setType(new CodeableConcept(new Coding("http://terminology.hl7.org/CodeSystem/extra-security-role-type", "humanuser", "Human User")));
-				agent.setWho(new Reference(user));
+				value.setValue(user);
+				agent.setAltId(user);
+				agent.setName(user);
 			}
-			agent.setAltId(user);
-			agent.setName(user);
 			agent.setRequestor(true);
 			agents.add(agent);
 			ae.setAgent(agents);

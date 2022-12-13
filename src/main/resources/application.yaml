@@ -20,8 +20,8 @@ spring:
     #driver: com.mysql.jdbc.Driver
 
     url: jdbc:oracle:thin:@localhost:1521/xe
-    username: system
-    password: oracle
+    username: jpa_fhir
+    password: jpa_fhir
     driver-class-name: oracle.jdbc.OracleDriver
     # database connection pool size
     hikari:
@@ -192,7 +192,7 @@ hapi:
 #  schema_management_strategy: CREATE
 #  username: SomeUsername
 basic-auth:
-  status: true
+  status: false
   admin-user: admin
   admin-password: admin
   human-user: human
@@ -201,3 +201,10 @@ audit:
   status: false
 crypt:
   status: false
+  securedata:
+    policyURL: "https://voltage-pp-0000.keysvil.sogei.it/policy/clientPolicy.xml"
+    trustStorePath : "/opt/voltage/voltage-simple-api-java/trustStore"
+    identity       : ${SECUREDATA_IDENTITY}
+    username       : ${SECUREDATA_USER}
+    password       : ${SECUREDATA_PASSWORD}
+    format         : {"AlphaNumericFPE2", "SSN", "AES"}

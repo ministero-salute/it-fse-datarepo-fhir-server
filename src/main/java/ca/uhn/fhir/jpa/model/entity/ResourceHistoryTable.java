@@ -32,10 +32,10 @@ import org.hibernate.annotations.OptimisticLock;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import it.finanze.sanita.ms.serverfhir.custom.crypt.Listener;
+import it.finanze.sanita.ms.serverfhir.custom.crypt.PatientListener;
 
 @Entity
-@EntityListeners(Listener.class)
+@EntityListeners(PatientListener.class)
 @Table(name = ResourceHistoryTable.HFJ_RES_VER, uniqueConstraints = {
 	@UniqueConstraint(name = ResourceHistoryTable.IDX_RESVER_ID_VER, columnNames = {"RES_ID", "RES_VER"})
 }, indexes = {

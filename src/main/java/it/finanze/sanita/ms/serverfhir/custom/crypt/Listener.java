@@ -16,15 +16,10 @@ import org.springframework.stereotype.Component;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.GZipUtil;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import it.finanze.sanita.ms.serverfhir.custom.helper.FHIRR4Helper;
 
 @Component
 public class Listener {
-
-	private static FhirContext fhirContextR4;
-
-	static {
-		fhirContextR4 = FhirContext.forR4();
-	}
 
 	@Value("${crypt.status}")
 	private Boolean cryptStatus;
@@ -68,7 +63,8 @@ public class Listener {
 
 	private byte[] reverseInfoPatient(byte[] resource) {
 		byte[] out = null;
-		Patient patient = fhirContextR4.newJsonParser().parseResource(Patient.class, GZipUtil.decompress(resource));
+		
+		Patient patient = FHIRR4Helper.deserializeResource(Patient.class, GZipUtil.decompress(resource), true);
 		for(HumanName humanName : patient.getName()) {
 			humanName.setFamily(StringUtils.reverse(humanName.getFamily()));
 			for(StringType given : humanName.getGiven()) {
@@ -76,7 +72,7 @@ public class Listener {
 			}
 		}
 
-		out = GZipUtil.compress(fhirContextR4.newJsonParser().encodeResourceToString(patient)); 
+		out = GZipUtil.compress(FHIRR4Helper.serializeResource(patient, false, false, false));
 
 		return out;
 	}

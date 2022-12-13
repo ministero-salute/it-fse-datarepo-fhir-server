@@ -66,6 +66,7 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import it.finanze.sanita.ms.serverfhir.config.OpenApiCFG;
+import it.finanze.sanita.ms.serverfhir.custom.audit.AuditInterceptor;
 import it.finanze.sanita.ms.serverfhir.repository.IRepositoryValidationInterceptorFactory;
 
 public class BaseJpaRestfulServer extends RestfulServer {
@@ -121,6 +122,9 @@ public class BaseJpaRestfulServer extends RestfulServer {
   @Autowired
   private IValidationSupport myValidationSupport;
 
+  @Autowired
+  private AuditInterceptor auditInterceptor;
+  
   @Autowired
   private OpenApiCFG openApiCFG;
   
@@ -430,5 +434,10 @@ public class BaseJpaRestfulServer extends RestfulServer {
 	 daoConfig.setStoreResourceInLuceneIndex(appProperties.getStore_resource_in_lucene_index_enabled());
     daoConfig.getModelConfig().setNormalizedQuantitySearchLevel(appProperties.getNormalized_quantity_search_level());
 	 daoConfig.getModelConfig().setIndexOnContainedResources(appProperties.getEnable_index_contained_resource());
+	 
+	 registerInterceptor(auditInterceptor);
+	 
+	 
+	 
   }
 }

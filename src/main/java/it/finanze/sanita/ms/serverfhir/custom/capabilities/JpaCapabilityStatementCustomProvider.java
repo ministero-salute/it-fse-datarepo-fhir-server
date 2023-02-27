@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -60,17 +61,12 @@ public class JpaCapabilityStatementCustomProvider extends JpaCapabilityStatement
 			searchParams = serverConfiguration.getActiveSearchParams(resourceName);
 		}
 
+		List<StringType> paths = searchParams.values()
+			.stream()
+			.filter(param -> param.getPath() != null && !param.getPath().contains("|"))
+			.map(param -> new StringType(param.getPath()))
+			.collect(Collectors.toList());
 
-		List<StringType> paths = new ArrayList<>();
-		
-		for (RuntimeSearchParam next : searchParams.values()) {
-			
-			String path = next.getPath();
-			if (path != null && !path.contains("|")) {
-				paths.add(new StringType(path));
-			}
-			
-		}
 		this.resourcesSearchPaths.add(new CustomCapabilityStatementRestResourceComponent(resourceName, paths));
 		
 	}

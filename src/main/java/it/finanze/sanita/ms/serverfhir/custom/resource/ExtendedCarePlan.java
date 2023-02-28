@@ -1,4 +1,4 @@
-package it.finanze.sanita.ms.serverfhir.config;
+package it.finanze.sanita.ms.serverfhir.custom.resource;
 
 import org.hl7.fhir.r4.model.CarePlan;
 

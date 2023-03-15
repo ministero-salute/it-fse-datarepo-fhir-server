@@ -20,7 +20,7 @@
 
 	<groupId>it.finanze.sanita.fse2</groupId>
 	<artifactId>datarepo-fhir-server-ms</artifactId>
-	<version>0.2.0-RELEASE</version>
+	<version>0.3.0-RELEASE</version>
 	<name>datarepo-fhir-server-ms</name>
 
 	<properties>

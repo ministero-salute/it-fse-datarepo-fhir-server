@@ -64,7 +64,7 @@ public class JpaCapabilityStatementCustomProvider extends JpaCapabilityStatement
 
 		List<StringType> paths = searchParams.values()
 			.stream()
-			.filter(param -> param.getPath() != null && !param.getPath().contains("|"))
+			.filter(param -> param.getPath() != null)
 			.map(param -> new StringType(param.getPath()))
 			.collect(Collectors.toList());
 
@@ -88,8 +88,8 @@ public class JpaCapabilityStatementCustomProvider extends JpaCapabilityStatement
 	protected void postProcess(FhirTerser theTerser, IBaseConformance theCapabilityStatement) {
 		LOGGER.info("postProcess() invoked");
 		super.postProcess(theTerser, theCapabilityStatement);
-		ExtendedCapabilityStatement customCapabilityStatement = (ExtendedCapabilityStatement) theCapabilityStatement;
-		customCapabilityStatement.setResourceSearchPaths(new ArrayList<>(this.resourcesSearchPaths) );
+		ExtendedCapabilityStatement extendedCapabilityStatement = (ExtendedCapabilityStatement) theCapabilityStatement;
+		extendedCapabilityStatement.setResourceSearchPaths(new ArrayList<>(this.resourcesSearchPaths) );
 		this.resourcesSearchPaths.clear();
 	}
 	

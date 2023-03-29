@@ -20,7 +20,8 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
-import it.finanze.sanita.ms.serverfhir.custom.capabilities.CustomCapabilityStatement.CustomCapabilityStatementRestResourceComponent;
+import it.finanze.sanita.ms.serverfhir.custom.resource.ExtendedCapabilityStatement;
+import it.finanze.sanita.ms.serverfhir.custom.resource.ExtendedCapabilityStatement.CustomCapabilityStatementRestResourceComponent;
 
 public class JpaCapabilityStatementCustomProvider extends JpaCapabilityStatementProvider {
 
@@ -87,7 +88,7 @@ public class JpaCapabilityStatementCustomProvider extends JpaCapabilityStatement
 	protected void postProcess(FhirTerser theTerser, IBaseConformance theCapabilityStatement) {
 		LOGGER.info("postProcess() invoked");
 		super.postProcess(theTerser, theCapabilityStatement);
-		CustomCapabilityStatement customCapabilityStatement = (CustomCapabilityStatement) theCapabilityStatement;
+		ExtendedCapabilityStatement customCapabilityStatement = (ExtendedCapabilityStatement) theCapabilityStatement;
 		customCapabilityStatement.setResourceSearchPaths(new ArrayList<>(this.resourcesSearchPaths) );
 		this.resourcesSearchPaths.clear();
 	}

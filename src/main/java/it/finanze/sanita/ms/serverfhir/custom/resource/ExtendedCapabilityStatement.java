@@ -1,4 +1,4 @@
-package it.finanze.sanita.ms.serverfhir.custom.capabilities;
+package it.finanze.sanita.ms.serverfhir.custom.resource;
 
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 @ResourceDef(name="CapabilityStatement", profile="http://hl7.org/fhir/StructureDefinition/CapabilityStatement")
-public class CustomCapabilityStatement extends CapabilityStatement {
+public class ExtendedCapabilityStatement extends CapabilityStatement {
 
 	private static final long serialVersionUID = 495587345059750716L;
 	

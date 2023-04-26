@@ -34,7 +34,7 @@ public class JpaCapabilityStatementCustomProvider extends JpaCapabilityStatement
 
 	protected void generateSearchParams(FhirTerser terser, IBase resource, String name) {
 
-		String[] keywords = new String[]{"where", "as", "is"};
+		String[] keywords = new String[]{".where(", " as ", " is "};
 
 		Map<String, RuntimeSearchParam> params = new HashMap<>(registry.getActiveSearchParams(name));
 

@@ -8,14 +8,16 @@ import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
+import it.finanze.sanita.ms.serverfhir.custom.helper.SearchParamHelper;
 import it.finanze.sanita.ms.serverfhir.custom.resource.ExtendedCapabilityStatement;
 import it.finanze.sanita.ms.serverfhir.custom.resource.ExtendedCapabilityStatement.CustomCapabilityStatementRestResourceComponent;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.r4.model.StringType;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class JpaCapabilityStatementCustomProvider extends JpaCapabilityStatementProvider {
 
@@ -32,47 +34,21 @@ public class JpaCapabilityStatementCustomProvider extends JpaCapabilityStatement
 		this.searches = new ArrayList<>();
 	}
 
-	protected void generateSearchParams(FhirTerser terser, IBase resource, String name) {
-
-		String[] keywords = new String[]{".where(", " as ", " is "};
-
-		Map<String, RuntimeSearchParam> params = new HashMap<>(registry.getActiveSearchParams(name));
-
-		List<String> paths = params
-			.values()
-			.stream()
-			.filter(p -> p.getBase().contains(name))
-			.map(RuntimeSearchParam::getPath)
-			.collect(Collectors.toList());
-
-		List<String> pure = paths.stream().filter(s -> !s.contains("|")).collect(Collectors.toList());
-
-		List<String> translated = paths.stream().filter(s -> s.contains("|")).map(s -> {
-			List<String> condition = new ArrayList<>();
-			String[] ops = s.split("\\|");
-			for (String op : ops) {
-				if(op.contains(name)) condition.add(op.trim());
-			}
-			return condition;
-		}).flatMap(List::stream).filter(s -> !s.isEmpty()).collect(Collectors.toList());
-
-		Set<String> out = new TreeSet<>();
-		out.addAll(pure);
-		out.addAll(translated);
-
-		// Exclude query or casting
-		out = out.stream().filter(s -> Arrays.stream(keywords).noneMatch(s::contains)).collect(Collectors.toSet());
-		// Exclude wrong references due to similarity
-		out = out.stream().filter(s -> s.split("\\.")[0].equals(name)).collect(Collectors.toSet());
-
-		this.searches.add(new CustomCapabilityStatementRestResourceComponent(name, out.stream().map(StringType::new).collect(Collectors.toList())));
+	protected void computeSearchParams(FhirTerser terser, IBase resource, String name) {
+		HashMap<String, RuntimeSearchParam> searchParams = new HashMap<>(registry.getActiveSearchParams(name));
+		List<String> allPaths = SearchParamHelper.getAllPaths(searchParams, name);
+		List<String> splitPaths = SearchParamHelper.splitPathsWithPipe(allPaths, name);
+		List<String> purePaths = SearchParamHelper.getPurePaths(splitPaths);
+		List<String> dirtyPaths = SearchParamHelper.getDirtyPaths(splitPaths);
+		List<String> cleanedPaths = SearchParamHelper.cleanPaths(name, dirtyPaths);
+		List<StringType> result = SearchParamHelper.aggregate(purePaths, cleanedPaths);
+		this.searches.add(new CustomCapabilityStatementRestResourceComponent(name, result));
 	}
-
 
 	@Override
 	protected void postProcessRestResource(FhirTerser terser, IBase res, String name) {
 		super.postProcessRestResource(terser, res, name);
-		generateSearchParams(terser, res, name);
+		computeSearchParams(terser, res, name);
 	}
 
 	@Override

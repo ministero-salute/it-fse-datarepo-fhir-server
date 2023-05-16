@@ -1,9 +1,8 @@
 package it.finanze.sanita.ms.serverfhir.custom.resource;
 
-import org.hl7.fhir.r4.model.CarePlan;
-
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import org.hl7.fhir.r4.model.CarePlan;
 
 @ResourceDef(name="CarePlan", profile="http://hl7.org/fhir/StructureDefinition/CarePlan")
 public class ExtendedCarePlan extends CarePlan {
@@ -15,5 +14,8 @@ public class ExtendedCarePlan extends CarePlan {
 
 	@SearchParamDefinition(name="outcomeReference", path="CarePlan.activity.outcomeReference", description="", type="reference")
 	public static final String SP_OUTCOME_REFERENCE = "outcomeReference";
+
+	@SearchParamDefinition(name="author", path="CarePlan.note.author")
+	public static final String SP_AUTHOR = "author";
 
 }

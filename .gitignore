@@ -11,6 +11,5 @@ bin/
 .factorypath
 .metadata
 tmp/
-.settings/org.eclipse.wst.common.project.facet.core.xml
-.settings/org.eclipse.wst.common.project.facet.core.prefs.xml
-.settings/org.eclipse.wst.common.component
+.DS_Store
+.idea

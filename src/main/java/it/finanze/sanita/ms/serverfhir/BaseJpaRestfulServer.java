@@ -67,6 +67,7 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import it.finanze.sanita.ms.serverfhir.config.OpenApiCFG;
 import it.finanze.sanita.ms.serverfhir.custom.audit.AuditInterceptor;
+import it.finanze.sanita.ms.serverfhir.custom.capabilities.JpaCapabilityStatementCustomProvider;
 import it.finanze.sanita.ms.serverfhir.repository.IRepositoryValidationInterceptorFactory;
 
 public class BaseJpaRestfulServer extends RestfulServer {
@@ -185,8 +186,11 @@ public class BaseJpaRestfulServer extends RestfulServer {
         setServerConformanceProvider(confProvider);
       } else if (fhirVersion == FhirVersionEnum.R4) {
 
-				JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(this, fhirSystemDao,
+    	  JpaCapabilityStatementCustomProvider confProvider = new JpaCapabilityStatementCustomProvider(this, fhirSystemDao,
 					daoConfig, searchParamRegistry, myValidationSupport);
+    	  
+//				JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(this, fhirSystemDao,
+//					daoConfig, searchParamRegistry, myValidationSupport);
         confProvider.setImplementationDescription("HAPI FHIR R4 Server");
         setServerConformanceProvider(confProvider);
       } else if (fhirVersion == FhirVersionEnum.R5) {

@@ -25,7 +25,7 @@ public class AppProperties {
   private Boolean allow_cascading_deletes = false;
   private Boolean allow_contains_searches = true;
   private Boolean allow_external_references = false;
-  private Boolean allow_multiple_delete = false;
+  private Boolean allow_multiple_delete = true;
   private Boolean allow_override_default_search_params = true;
   private Boolean auto_create_placeholder_reference_targets = false;
   private Boolean dao_scheduling_enabled = true;
